@@ -2,7 +2,7 @@ package controllers
 
 import "fmt"
 
-func createNewUser() {
+func CreateNewUser() {
 
 	fmt.Println("create new user")
 
