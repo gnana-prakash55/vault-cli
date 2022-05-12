@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -13,7 +12,7 @@ import (
 	"path/filepath"
 )
 
-const URL = ""
+const URL = "http://localhost:8888/submit"
 
 type Token struct {
 	Token string `json:"token"`
@@ -21,12 +20,12 @@ type Token struct {
 
 func ReadToken() (string, error) {
 
-	jsonFile, err := os.Open(filepath.Join("credentials", "token.json"))
+	jsonFile, err := os.Open(filepath.Join(".credentials", "secret.json"))
 	if err != nil {
 		return "", err
 	}
 
-	fmt.Println("Opening credentials....")
+	log.Println("Opening credentials....")
 
 	defer jsonFile.Close()
 
@@ -35,8 +34,6 @@ func ReadToken() (string, error) {
 	var token Token
 
 	json.Unmarshal(value, &token)
-
-	fmt.Println(token)
 
 	return token.Token, nil
 
@@ -49,9 +46,11 @@ func UploadFiles(filename, token string) (string, error) {
 		return "", err
 	}
 
+	defer file.Close()
+
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile("fileUpload", filepath.Base(file.Name()))
+	part, err := writer.CreateFormFile("fileUploadName", filepath.Base(file.Name()))
 
 	if err != nil {
 		return "", err
@@ -73,8 +72,11 @@ func UploadFiles(filename, token string) (string, error) {
 	response, err := client.Do(request)
 
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
+
+	log.Println("Logging in...")
+
 	defer response.Body.Close()
 
 	content, err := ioutil.ReadAll(response.Body)
