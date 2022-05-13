@@ -5,6 +5,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"github.com/gnana-prakash55/vault-cli/controllers"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +21,9 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		// repoName, _ := cmd.Flags().GetString("repo")
+		repoName, _ := cmd.Flags().GetString("name")
+
+		controllers.CreateRepo(repoName)
 
 	},
 }
@@ -32,7 +35,7 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	newrepoCmd.PersistentFlags().StringP("repo", "r", "", "Repository Name")
+	newrepoCmd.PersistentFlags().StringP("name", "n", "", "Repository Name")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

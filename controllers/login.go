@@ -33,7 +33,7 @@ func Login(email string, password string) {
 		log.Fatalln(err)
 	}
 
-	res, err := http.Post("http://localhost:3000/login", "application/json", bytes.NewBuffer(jsonRes))
+	res, err := http.Post("http://13.232.12.225:3000/login", "application/json", bytes.NewBuffer(jsonRes))
 
 	if err != nil {
 		log.Fatalln(err)
@@ -57,13 +57,13 @@ func Login(email string, password string) {
 		log.Fatalln(err)
 	}
 
-	err = os.MkdirAll(".credentials", os.ModePerm)
+	err = os.MkdirAll(".credentails", os.ModePerm)
 
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = ioutil.WriteFile(".credentials/secret.json", jsonToken, 0644)
+	err = ioutil.WriteFile(".credentails/secret.json", jsonToken, 0644)
 
 	if err != nil {
 		log.Fatalln(err)

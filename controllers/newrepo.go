@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 )
 
 // struct for new repo
@@ -26,22 +29,51 @@ func CreateRepo(repoName string) {
 		log.Fatalln(err)
 	}
 
-	// tokenFile, err := ioutil.ReadFile("/credentails/secret.json")
+	jsonFile, err := os.Open(filepath.Join(".credentails", "secret.json"))
 
-	req, err := http.NewRequest("POST", "http://localhost:3000/repo/create", bytes.NewBuffer(jsonRes))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	defer jsonFile.Close()
+
+	value, err := ioutil.ReadAll(jsonFile)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	var token Token
+
+	json.Unmarshal(value, &token)
+
+	req, err := http.NewRequest("POST", "http://13.232.12.225:3000/repo/create", bytes.NewBuffer(jsonRes))
+
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+token.Token)
 
-	// res, err := http.Post("http://localhost:3000/repo/create", "application/json", bytes.NewBuffer(jsonRes))
+	client := &http.Client{}
 
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
+	res, err := client.Do(req)
 
-	// defer res.Body.Close()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	// bodyBytes, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
-	// bodyString := string(bodyBytes)
+	con, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	bodyString := string(con)
+
+	fmt.Println(bodyString)
 
 }
