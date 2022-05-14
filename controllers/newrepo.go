@@ -16,6 +16,10 @@ type NewRepo struct {
 	Repo string `json:"repoName"`
 }
 
+type ConfigFile struct {
+	RepoName string `json:"reponame"`
+}
+
 // create new repo for user
 func CreateRepo(repoName string) {
 
@@ -29,7 +33,7 @@ func CreateRepo(repoName string) {
 		log.Fatalln(err)
 	}
 
-	jsonFile, err := os.Open(filepath.Join(".credentials", "secret.json"))
+	jsonFile, err := os.Open(filepath.Join(".vault", "credentails", "secret.json"))
 
 	if err != nil {
 		log.Fatalln(err)
@@ -73,6 +77,24 @@ func CreateRepo(repoName string) {
 	}
 
 	bodyString := string(con)
+
+	if bodyString == "repo created" {
+
+		config := ConfigFile{repoName}
+
+		jsonConfig, err := json.Marshal(config)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		err = ioutil.WriteFile(".vault/config.json", jsonConfig, 0644)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+	}
 
 	fmt.Println(bodyString)
 
