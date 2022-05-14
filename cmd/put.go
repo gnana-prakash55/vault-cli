@@ -7,6 +7,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/gnana-prakash55/vault-cli/utils"
 	"github.com/spf13/cobra"
@@ -23,19 +24,21 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		filename := args[0]
+		path, _ := os.Getwd()
 
 		token, err := utils.ReadToken()
 		if err != nil {
 			log.Fatalf("Unable to Login...")
 		}
 
-		resp, err := utils.UploadFiles(filename, token)
+		resp, err := utils.UploadFiles(path, token)
 		if err != nil {
 			log.Fatalln("Unable to Upload...", err.Error())
 		}
 
 		fmt.Println(resp)
+		// path, _ := os.Getwd()
+		// utils.UploadFiles(path)
 
 	},
 }

@@ -57,13 +57,13 @@ func Login(email string, password string) {
 		log.Fatalln(err)
 	}
 
-	err = os.MkdirAll(".credentails", os.ModePerm)
+	err = os.MkdirAll(".credentials", os.ModePerm)
 
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = ioutil.WriteFile(".credentails/secret.json", jsonToken, 0644)
+	err = ioutil.WriteFile(".credentials/secret.json", jsonToken, 0644)
 
 	if err != nil {
 		log.Fatalln(err)

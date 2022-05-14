@@ -29,7 +29,7 @@ func CreateRepo(repoName string) {
 		log.Fatalln(err)
 	}
 
-	jsonFile, err := os.Open(filepath.Join(".credentails", "secret.json"))
+	jsonFile, err := os.Open(filepath.Join(".credentials", "secret.json"))
 
 	if err != nil {
 		log.Fatalln(err)

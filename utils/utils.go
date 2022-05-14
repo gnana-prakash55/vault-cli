@@ -3,7 +3,9 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"mime/multipart"
@@ -12,15 +14,19 @@ import (
 	"path/filepath"
 )
 
-const URL = "http://localhost:8888/submit"
+const URL = "http://localhost:3000/repo/upload"
 
 type Token struct {
 	Token string `json:"token"`
 }
 
+type Config struct {
+	RepoName string `json:"repoName"`
+}
+
 func ReadToken() (string, error) {
 
-	jsonFile, err := os.Open(filepath.Join(".credentials", "secret.json"))
+	jsonFile, err := os.Open(filepath.Join(".vault", "credentials", "secret.json"))
 	if err != nil {
 		return "", err
 	}
@@ -39,25 +45,66 @@ func ReadToken() (string, error) {
 
 }
 
-func UploadFiles(filename, token string) (string, error) {
-	file, err := os.Open(filename)
-
+func ReadConfig() (Config, error) {
+	jsonFile, err := os.Open(filepath.Join(".vault", "config.json"))
 	if err != nil {
-		return "", err
+		return Config{}, err
 	}
 
-	defer file.Close()
+	configValue, _ := ioutil.ReadAll(jsonFile)
+	var config Config
+
+	err = json.Unmarshal(configValue, &config)
+
+	return config, nil
+
+}
+
+func UploadFiles(path, token string) (string, error) {
 
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile("fileUploadName", filepath.Base(file.Name()))
+
+	config, err := ReadConfig()
+
+	writer.WriteField("repo", config.RepoName)
+
+	err = filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+
+		// fmt.Printf("dir: %v: name: %s\n", info.IsDir(), path)
+
+		if !info.IsDir() {
+
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+
+			defer file.Close()
+
+			fmt.Println(file.Name())
+			part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
+
+			if err != nil {
+				return err
+			}
+
+			io.Copy(part, file)
+
+		}
+
+		return nil
+	})
+
+	writer.Close()
 
 	if err != nil {
-		return "", err
+		panic(err)
 	}
-
-	io.Copy(part, file)
-	writer.Close()
 
 	request, err := http.NewRequest("POST", URL, body)
 
@@ -66,7 +113,7 @@ func UploadFiles(filename, token string) (string, error) {
 	}
 
 	request.Header.Add("Content-Type", writer.FormDataContentType())
-	request.Header.Add("Authorizaton", "Bearer "+token)
+	request.Header.Add("Authorization", "Bearer "+token)
 	client := &http.Client{}
 
 	response, err := client.Do(request)
