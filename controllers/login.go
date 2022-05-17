@@ -10,6 +10,8 @@ import (
 	"os"
 )
 
+const LOGIN_URL = "http://localhost:3000/login"
+
 // struct for user login
 type LoginUser struct {
 	Email    string `json:"email"`
@@ -33,7 +35,7 @@ func Login(email string, password string) {
 		log.Fatalln(err)
 	}
 
-	res, err := http.Post("http://13.232.12.225:3000/login", "application/json", bytes.NewBuffer(jsonRes))
+	res, err := http.Post(LOGIN_URL, "application/json", bytes.NewBuffer(jsonRes))
 
 	if err != nil {
 		log.Fatalln(err)
@@ -57,13 +59,13 @@ func Login(email string, password string) {
 		log.Fatalln(err)
 	}
 
-	err = os.MkdirAll(".vault/credentails", os.ModePerm)
+	err = os.MkdirAll(".vault/credentials", os.ModePerm)
 
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = ioutil.WriteFile(".vault/credentails/secret.json", jsonToken, 0644)
+	err = ioutil.WriteFile(".vault/credentials/secret.json", jsonToken, 0644)
 
 	if err != nil {
 		log.Fatalln(err)

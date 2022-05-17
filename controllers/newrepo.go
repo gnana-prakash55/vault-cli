@@ -20,6 +20,8 @@ type ConfigFile struct {
 	RepoName string `json:"reponame"`
 }
 
+const URL = "http://localhost:3000/repo/create"
+
 // create new repo for user
 func CreateRepo(repoName string) {
 
@@ -33,7 +35,7 @@ func CreateRepo(repoName string) {
 		log.Fatalln(err)
 	}
 
-	jsonFile, err := os.Open(filepath.Join(".vault", "credentails", "secret.json"))
+	jsonFile, err := os.Open(filepath.Join(".vault", "credentials", "secret.json"))
 
 	if err != nil {
 		log.Fatalln(err)
@@ -51,7 +53,7 @@ func CreateRepo(repoName string) {
 
 	json.Unmarshal(value, &token)
 
-	req, err := http.NewRequest("POST", "http://13.232.12.225:3000/repo/create", bytes.NewBuffer(jsonRes))
+	req, err := http.NewRequest("POST", URL, bytes.NewBuffer(jsonRes))
 
 	if err != nil {
 		log.Fatalln(err)
