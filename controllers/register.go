@@ -33,7 +33,7 @@ func CreateNewUser(email string, username string, password string) {
 	}
 
 	// make the post request to the server
-	res, err := http.Post("http://13.232.12.225:3000/user/create", "application/json", bytes.NewBuffer(jsonRes))
+	res, err := http.Post("http://13.127.224.137:3000/user/create", "application/json", bytes.NewBuffer(jsonRes))
 
 	// err handler
 	if err != nil {

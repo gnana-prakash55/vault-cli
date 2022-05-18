@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-const LOGIN_URL = "http://localhost:3000/login"
+const LOGIN_URL = "http://13.127.224.137:3000/login"
 
 // struct for user login
 type LoginUser struct {
