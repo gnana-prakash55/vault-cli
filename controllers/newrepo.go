@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/gnana-prakash55/vault-cli/utils"
 )
 
 // struct for new repo
@@ -19,8 +21,6 @@ type NewRepo struct {
 type ConfigFile struct {
 	RepoName string `json:"reponame"`
 }
-
-const URL = "http://localhost:3000/repo/create"
 
 // create new repo for user
 func CreateRepo(repoName string) {
@@ -53,7 +53,7 @@ func CreateRepo(repoName string) {
 
 	json.Unmarshal(value, &token)
 
-	req, err := http.NewRequest("POST", URL, bytes.NewBuffer(jsonRes))
+	req, err := http.NewRequest("POST", utils.GoDotEnvVariable("URL")+"/repo/create", bytes.NewBuffer(jsonRes))
 
 	if err != nil {
 		log.Fatalln(err)

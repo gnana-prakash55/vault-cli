@@ -8,9 +8,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-)
 
-const LOGIN_URL = "http://localhost:3000/login"
+	"github.com/gnana-prakash55/vault-cli/utils"
+)
 
 // struct for user login
 type LoginUser struct {
@@ -35,7 +35,7 @@ func Login(email string, password string) {
 		log.Fatalln(err)
 	}
 
-	res, err := http.Post(LOGIN_URL, "application/json", bytes.NewBuffer(jsonRes))
+	res, err := http.Post(utils.GoDotEnvVariable("URL")+"/login", "application/json", bytes.NewBuffer(jsonRes))
 
 	if err != nil {
 		log.Fatalln(err)
