@@ -94,3 +94,25 @@ func CreateRepo(repoName string) {
 	fmt.Println(bodyString)
 
 }
+
+func SetConfig(repoName string) error {
+
+	repo := NewRepo{repoName}
+
+	jsonRes, err := json.Marshal(repo)
+
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(".vault/config.json", jsonRes, 0644)
+
+	log.Println("Setting config...")
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
