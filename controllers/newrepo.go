@@ -7,8 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 
 	"github.com/gnana-prakash55/vault-cli/utils"
 )
@@ -35,23 +33,17 @@ func CreateRepo(repoName string) {
 		log.Fatalln(err)
 	}
 
-	jsonFile, err := os.Open(filepath.Join(".vault", "credentials", "secret.json"))
+	token, err := utils.ReadToken()
 
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	defer jsonFile.Close()
-
-	value, err := ioutil.ReadAll(jsonFile)
+	err = ioutil.WriteFile(".vault/config.json", jsonRes, 0644)
 
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	var token Token
-
-	json.Unmarshal(value, &token)
 
 	req, err := http.NewRequest("POST", utils.GoDotEnvVariable("URL")+"/repo/create", bytes.NewBuffer(jsonRes))
 
@@ -60,7 +52,7 @@ func CreateRepo(repoName string) {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+token.Token)
+	req.Header.Add("Authorization", "Bearer "+token)
 
 	client := &http.Client{}
 
