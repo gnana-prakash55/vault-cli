@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/fs"
 	"io/ioutil"
 	"log"
 	"mime/multipart"
@@ -59,55 +58,57 @@ func ReadConfig() (Config, error) {
 
 	err = json.Unmarshal(configValue, &config)
 
+	if err != nil {
+		panic(err)
+	}
+
 	return config, nil
 
 }
 
 func UploadFiles(path, token string) (string, error) {
 
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
+	err := os.MkdirAll("../compressed", os.ModePerm)
+
+	if err != nil {
+		return "", err
+	}
 
 	config, err := ReadConfig()
 
+	if err != nil {
+		return "", err
+	}
+
+	err = RecursiveZip(path, filepath.Join("../compressed", config.RepoName+".zip"))
+
+	if err != nil {
+		return "", err
+	}
+
+	// return "success", nil
+
+	body := &bytes.Buffer{}
+
+	writer := multipart.NewWriter(body)
+
 	writer.WriteField("repo", config.RepoName)
 
-	err = filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
+	part, err := writer.CreateFormFile("file", config.RepoName+".zip")
 
-		// fmt.Printf("dir: %v: name: %s\n", info.IsDir(), path)
+	if err != nil {
+		return "", err
+	}
 
-		if !info.IsDir() {
+	file, err := os.Open(filepath.Join("../compressed", config.RepoName+".zip"))
 
-			file, err := os.Open(path)
-			if err != nil {
-				return err
-			}
-
-			defer file.Close()
-
-			fmt.Println(file.Name())
-			part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
-
-			if err != nil {
-				return err
-			}
-
-			io.Copy(part, file)
-
-		}
-
-		return nil
-	})
-
-	writer.Close()
+	io.Copy(part, file)
 
 	if err != nil {
 		panic(err)
 	}
+
+	writer.Close()
 
 	request, err := http.NewRequest("POST", URL, body)
 
@@ -135,6 +136,11 @@ func UploadFiles(path, token string) (string, error) {
 		return "", err
 	}
 
+	err = os.RemoveAll("../compressed")
+	if err != nil {
+		return "", err
+	}
+
 	return string(content), nil
 
 }
@@ -142,6 +148,10 @@ func UploadFiles(path, token string) (string, error) {
 func GetFiles(token string) {
 
 	config, err := ReadConfig()
+
+	if err != nil {
+		panic(err)
+	}
 
 	body, err := json.Marshal(config)
 
@@ -181,6 +191,8 @@ func GetFiles(token string) {
 
 	err = Unzip(content, "content")
 
+	log.Println("Unzipping files...")
+
 	if err != nil {
 		panic(err)
 	}
@@ -214,9 +226,9 @@ func Unzip(src []byte, dest string) error {
 		}
 
 		if f.FileInfo().IsDir() {
-			os.MkdirAll(path, f.Mode())
+			os.MkdirAll(path, os.ModePerm)
 		} else {
-			os.MkdirAll(filepath.Dir(path), f.Mode())
+			os.MkdirAll(filepath.Dir(path), os.ModePerm)
 			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 			if err != nil {
 				return err
@@ -240,6 +252,50 @@ func Unzip(src []byte, dest string) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func RecursiveZip(pathToZip, destinationPath string) error {
+	destinationFile, err := os.Create(destinationPath)
+	if err != nil {
+		return err
+	}
+	myZip := zip.NewWriter(destinationFile)
+	fmt.Println("Creating Writer!!!")
+	err = filepath.Walk(pathToZip, func(filePath string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		relPath := strings.TrimPrefix(filePath, filepath.Dir(pathToZip))
+		zipFile, err := myZip.Create(relPath)
+		if err != nil {
+			return err
+		}
+		fsFile, err := os.Open(filePath)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(filePath)
+
+		_, err = io.Copy(zipFile, fsFile)
+
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	err = myZip.Close()
+	if err != nil {
+		return err
 	}
 
 	return nil
