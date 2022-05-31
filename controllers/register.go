@@ -7,8 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-
-	"github.com/gnana-prakash55/vault-cli/utils"
+	"os"
 )
 
 // struct for users
@@ -35,7 +34,7 @@ func CreateNewUser(email string, username string, password string) {
 	}
 
 	// make the post request to the server
-	res, err := http.Post(utils.GoDotEnvVariable("URL")+"/user/create", "application/json", bytes.NewBuffer(jsonRes))
+	res, err := http.Post(os.Getenv("URL")+"/user/create", "application/json", bytes.NewBuffer(jsonRes))
 
 	// err handler
 	if err != nil {

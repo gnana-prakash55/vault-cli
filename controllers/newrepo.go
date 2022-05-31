@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gnana-prakash55/vault-cli/utils"
 )
@@ -45,7 +46,7 @@ func CreateRepo(repoName string) {
 		log.Fatalln(err)
 	}
 
-	req, err := http.NewRequest("POST", utils.GoDotEnvVariable("URL")+"/repo/create", bytes.NewBuffer(jsonRes))
+	req, err := http.NewRequest("POST", os.Getenv("URL")+"/repo/create", bytes.NewBuffer(jsonRes))
 
 	if err != nil {
 		log.Fatalln(err)

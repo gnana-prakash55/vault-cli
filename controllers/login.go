@@ -8,8 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/gnana-prakash55/vault-cli/utils"
 )
 
 // struct for user login
@@ -35,7 +33,7 @@ func Login(email string, password string) {
 		log.Fatalln(err)
 	}
 
-	res, err := http.Post(utils.GoDotEnvVariable("URL")+"/login", "application/json", bytes.NewBuffer(jsonRes))
+	res, err := http.Post(os.Getenv("URL")+"/login", "application/json", bytes.NewBuffer(jsonRes))
 
 	if err != nil {
 		log.Fatalln(err)

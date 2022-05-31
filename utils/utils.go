@@ -13,8 +13,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/joho/godotenv"
 )
 
 const URL = "http://localhost:3000/repo/put"
@@ -112,7 +110,7 @@ func UploadFiles(path, token string) (string, error) {
 
 	writer.Close()
 
-	request, err := http.NewRequest("POST", GoDotEnvVariable("URL")+"/repo/put", body)
+	request, err := http.NewRequest("POST", os.Getenv("URL")+"/repo/put", body)
 
 	if err != nil {
 		return "", err
@@ -165,7 +163,7 @@ func GetFiles(token string) {
 		panic(err)
 	}
 
-	request, err := http.NewRequest("POST", GoDotEnvVariable("URL")+"/repo/get", bytes.NewBuffer(body))
+	request, err := http.NewRequest("POST", os.Getenv("URL")+"/repo/get", bytes.NewBuffer(body))
 
 	if err != nil {
 		panic(err)
@@ -301,16 +299,4 @@ func RecursiveZip(pathToZip, destinationPath string) error {
 	}
 
 	return nil
-}
-
-func GoDotEnvVariable(key string) string {
-
-	// load .env file
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-
-	return os.Getenv(key)
 }
